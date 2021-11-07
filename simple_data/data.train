@@ -1,0 +1,50 @@
+[
+  {
+    "context": "因 有 关 日 寇 在 京 掠 夺 文 物 详 情 ， 藏 界 较 为 重 视 ， 也 是 我 们 收 藏 北 京 史 料 中 的 要 件 之 一 。",
+    "end_position": [
+      3,
+      6,
+      28
+    ],
+    "entity_label": "NS",
+    "impossible": false,
+    "qas_id": "2.1",
+    "query": "按照地理位置划分的国家,城市,乡镇,大洲",
+    "span_position": [
+      "3;3",
+      "6;6",
+      "27;28"
+    ],
+    "start_position": [
+      3,
+      6,
+      27
+    ]
+  },
+    {
+    "context": "当 地 人 说 这 些 小 螃 蟹 是 从 银 河 爬 过 来 的 ， 几 千 年 也 长 不 大 。",
+    "end_position": [
+      12
+    ],
+    "entity_label": "NS",
+    "impossible": false,
+    "qas_id": "20903.1",
+    "query": "按照地理位置划分的国家,城市,乡镇,大洲",
+    "span_position": [
+      "11;12"
+    ],
+    "start_position": [
+      11
+    ]
+  },
+  {
+    "context": "当 地 人 说 这 些 小 螃 蟹 是 从 银 河 爬 过 来 的 ， 几 千 年 也 长 不 大 。",
+    "end_position": [],
+    "entity_label": "NR",
+    "impossible": true,
+    "qas_id": "20903.2",
+    "query": "人名和虚构的人物形象",
+    "span_position": [],
+    "start_position": []
+  }
+]

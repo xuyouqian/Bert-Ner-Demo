@@ -1,11 +1,15 @@
 from torch.utils.data import Dataset, DataLoader
+from transformers import AdamW
+from model import BertQueryNER
 import numpy as np
+
+import torch
 import json
 
 
 def read_data(path):
-    with open(path) as F:
-        return json.loads(F)
+    with open(path,encoding='utf-8') as F:
+        return json.load(F)
 
 
 def whitespace_tokenize(text):
@@ -114,6 +118,19 @@ class NerDataset(Dataset):  # 继承Dataset
                self.label_map[entity_label]
 
 
+def collate_fn(batch):
+    #  batch是一个列表，其中是一个一个的元组，每个元组是dataset中_getitem__的结果
+    batch = list(zip(*batch))
+    input_ids = torch.tensor(batch[1], dtype=torch.long)
+    input_mask = torch.tensor(batch[2], dtype=torch.long)
+    segment_ids = torch.tensor(batch[3], dtype=torch.long)
+    start_pos = torch.tensor(batch[4], dtype=torch.long)
+    end_pos = torch.tensor(batch[5], dtype=torch.long)
+    span_position = torch.tensor(batch[6], dtype=torch.long)
+    entity_label = torch.tensor(batch[7], dtype=torch.long)
+
+    del batch
+    return input_ids, input_mask, segment_ids, start_pos, end_pos, span_position, entity_label
 
 
 def process_impossible_data(tokenizer, max_seq_length, whitespace_doc):
@@ -176,3 +193,32 @@ def process_possible_data(tokenizer, max_seq_length, whitespace_doc, start_posit
             continue
 
     return all_doc_tokens, doc_start_pos, doc_end_pos, doc_span_pos
+
+
+def load_model(config):
+    device = config.device
+    n_gpu = config.n_gpu if torch.cuda.is_available() else 0
+    model = BertQueryNER(config, )
+    model.to(device)
+    if n_gpu > 1:
+        model = torch.nn.DataParallel(model)
+
+    # prepare optimzier
+    param_optimizer = list(model.named_parameters())
+
+    no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
+    optimizer_grouped_parameters = [
+        {"params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], "weight_decay": 0.01},
+        {"params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], "weight_decay": 0.0}]
+
+    optimizer = AdamW(optimizer_grouped_parameters, lr=config.learning_rate, eps=10e-8)
+    sheduler = None
+
+    return model, optimizer, sheduler, device, n_gpu
+
+
+def create_data_loader(path, config):
+    data = read_data(path)
+    ner = NerDataset(data, config.label_map, config.tokenizer, 128)
+    loader = DataLoader(ner, batch_size=config.batch_size, collate_fn=collate_fn)
+    return loader

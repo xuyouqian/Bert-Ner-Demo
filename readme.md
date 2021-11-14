@@ -1,4 +1,4 @@
-# 嵌套命名实体识别
+# 嵌套命名实体识别 Nested NER
 bert pytorch 
 
 完整代码结构架构

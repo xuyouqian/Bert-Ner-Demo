@@ -61,14 +61,12 @@ def eval_checkpoint(model_object, eval_dataloader, config, \
         end_gold_lst += end_pos
         span_gold_lst += span_pos
 
-
-
     eval_accuracy, eval_precision, eval_recall, eval_f1 = nested_ner_performance(start_pred_lst, end_pred_lst,
-                                                                                     span_pred_lst, start_gold_lst,
-                                                                                     end_gold_lst, span_gold_lst,
-                                                                                     ner_cate_lst, label_list,
-                                                                                     threshold=config.entity_threshold,
-                                                                                     dims=2)
+                                                                                 span_pred_lst, start_gold_lst,
+                                                                                 end_gold_lst, span_gold_lst,
+                                                                                 ner_cate_lst, label_list,
+                                                                                 threshold=config.entity_threshold,
+                                                                                 dims=2)
 
     average_loss = round(eval_loss / eval_steps, 4)
     eval_f1 = round(eval_f1, 4)
@@ -79,20 +77,33 @@ def eval_checkpoint(model_object, eval_dataloader, config, \
     return average_loss, eval_accuracy, eval_precision, eval_recall, eval_f1
 
 
+# def nested_transform_span_triple(start_labels, end_labels, span_labels, ner_cate, print_info=False, threshold=0.5):
+#     span_triple_lst = []
+#     # element in span_triple_lst is (ner_cate, start_index, end_index)
+#
+#     start_labels = [idx for idx, tmp in enumerate(start_labels) if tmp != 0]
+#     end_labels = [idx for idx, tmp in enumerate(end_labels) if tmp != 0]
+#
+#     for tmp_start in start_labels:
+#         tmp_end = [tmp for tmp in end_labels if tmp >= tmp_start]
+#         if len(tmp_end) == 0:
+#             continue
+#         for candidate_end in tmp_end:
+#             if span_labels[tmp_start][candidate_end] >= threshold:
+#                 tmp_tag = Tag('一', ner_cate, tmp_start, candidate_end)
+#                 span_triple_lst.append(tmp_tag)
+#
+#     return span_triple_lst
 
 
 def nested_transform_span_triple(start_labels, end_labels, span_labels, ner_cate, print_info=False, threshold=0.5):
     span_triple_lst = []
     # element in span_triple_lst is (ner_cate, start_index, end_index)
 
-    start_labels = [idx for idx, tmp in enumerate(start_labels) if tmp != 0]
-    end_labels = [idx for idx, tmp in enumerate(end_labels) if tmp != 0]
+    matrix_len = len(span_labels)
 
-    for tmp_start in start_labels:
-        tmp_end = [tmp for tmp in end_labels if tmp >= tmp_start]
-        if len(tmp_end) == 0:
-            continue
-        for candidate_end in tmp_end:
+    for tmp_start in range(matrix_len):
+        for candidate_end in range(tmp_start, matrix_len):
             if span_labels[tmp_start][candidate_end] >= threshold:
                 tmp_tag = Tag('一', ner_cate, tmp_start, candidate_end)
                 span_triple_lst.append(tmp_tag)
@@ -132,14 +143,13 @@ def nested_ner_performance(pred_start, pred_end, pred_span, \
             acc_lst.append((tmp_acc_s + tmp_acc_e) / 2.0)
 
         span_precision, span_recall, span_f1 = nested_calculate_f1(pred_span_triple_lst,
-                                                                                gold_span_triple_lst, dims=2)
+                                                                   gold_span_triple_lst, dims=2)
         average_acc = sum(acc_lst) / (len(acc_lst) * 1.0)
 
         return average_acc, span_precision, span_recall, span_f1
 
     else:
         raise ValueError("Please notice that dims can only be 1 or 2 !")
-
 
 
 def compute_acc(pred_label, gold_label):
@@ -226,6 +236,9 @@ def nested_calculate_f1(pred_span_tag_lst, gold_span_tag_lst, dims=2):
                 if pred not in pred_set:
                     false_negatives += 1
 
+        print('是实体并且被预测为实体:', true_positives)
+        print('不是实体被预测为实体', false_positives)
+        print('是实体被预测为O:', false_negatives)
         precision = true_positives / (true_positives + false_positives + 1e-10)
         recall = true_positives / (true_positives + false_negatives + 1e-10)
         f1 = 2 * precision * recall / (precision + recall + 1e-10)

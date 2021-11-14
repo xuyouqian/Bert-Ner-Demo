@@ -12,7 +12,8 @@ label_map = config.label_map
 with open('data.train', "r", encoding='utf8') as f:
     input_data = json.load(f)
 
-ner = NerDataset(input_data, label_map, tokenizer, 200)
+# collate_fn=collate_fn
+ner = NerDataset(input_data, label_map, tokenizer, 150)
 loader = DataLoader(ner, batch_size=2, collate_fn=collate_fn)
 
 if __name__ == '__main__':
@@ -22,3 +23,4 @@ if __name__ == '__main__':
         print(i[0].shape)
         print(i[-2].shape)
         print(i[-1].shape)
+    pass

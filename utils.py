@@ -8,7 +8,7 @@ import json
 
 
 def read_data(path):
-    with open(path,encoding='utf-8') as F:
+    with open(path, encoding='utf-8') as F:
         return json.load(F)
 
 
@@ -220,5 +220,5 @@ def load_model(config):
 def create_data_loader(path, config):
     data = read_data(path)
     ner = NerDataset(data, config.label_map, config.tokenizer, 128)
-    loader = DataLoader(ner, batch_size=config.batch_size, collate_fn=collate_fn)
+    loader = DataLoader(ner, batch_size=config.batch_size, shuffle=True)
     return loader

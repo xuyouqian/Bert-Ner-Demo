@@ -9,7 +9,7 @@ class Config:
     def __init__(self):
         self.label_list = ['NS', 'NR', 'NT', 'O']
         self.label_map = {tmp: idx for idx, tmp in enumerate(self.label_list)}
-        self.max_seq_length = 128
+        self.max_seq_length = 150
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
         self.model_path = 'chinese_L-12_H-768_A-12'
@@ -31,8 +31,10 @@ class Config:
         self.entity_threshold = 0.5
         self.entity_sign = 'flat'
 
-        self.batch_size = 64
+        self.batch_size = 2
         self.checkpoint = 15
         self.export_model = True
+
+        output_dir = ''
 if __name__ == '__main__':
     config = Config()
